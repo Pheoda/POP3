@@ -8,6 +8,9 @@ import java.util.logging.Logger;
 
 public class Connection implements Runnable {
 
+    public final int CR = 13;
+    public final int LF = 10;
+
     private User[] listUsers = {
             new User("user", "pass"),
             new User("user2", "pass")
@@ -41,6 +44,7 @@ public class Connection implements Runnable {
 
     private String[] readCommand() {
         int character = -1;
+        boolean end = false, crReceived = false;
         String request = "";
         do {
             try {
@@ -48,10 +52,14 @@ public class Connection implements Runnable {
 
                 request += (char) character;
 
+                end = crReceived && character == LF;
+
+                crReceived = (character == CR);
+
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        }while(character != -1);
+        }while(character != -1 && !end);
 
         return request.split("\\s+");
     }
