@@ -1,3 +1,5 @@
+package server;
+
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -81,44 +83,46 @@ public class Connection implements Runnable {
             System.out.println("received=");
             for(int i = 0; i < clientMessage.length; i++)
                 System.out.println(clientMessage[i] + '\n');
-            String command = clientMessage[0].toUpperCase();
 
-            switch(command) {
-                case "QUIT":
-                    // Destroy object
-                    sendMessage("+OK");
-                    run = false;
-                    break;
-                case "APOP":
-                    // Check list users
-                    if(state == State.AUTHORIZATION) {
-                        if (command.length() == 3) {
-                            for (User u : listUsers) {
-                                if(u.userExists(clientMessage[1], clientMessage[2])) {
-                                    currentUser = u;
-                                    break;
+            if(clientMessage.length > 0) {
+                String command = clientMessage[0].toUpperCase();
+
+                switch (command) {
+                    case "QUIT":
+                        // Destroy object
+                        sendMessage("+OK client closing");
+                        run = false;
+                        break;
+                    case "APOP":
+                        // Check list users
+                        if (state == State.AUTHORIZATION) {
+                            if (command.length() == 3) {
+                                for (User u : listUsers) {
+                                    if (u.userExists(clientMessage[1], clientMessage[2])) {
+                                        currentUser = u;
+                                        break;
+                                    }
                                 }
+                                // server.User reconnu ou non
+                                if (currentUser != null) {
+                                    state = State.TRANSACTION;
+                                    sendMessage("+OK user connected");
+                                } else
+                                    sendMessage("-ERR user or password false");
                             }
-                            // User reconnu ou non
-                            if(currentUser != null) {
-                                state = State.TRANSACTION;
-                                sendMessage("+OK user connected");
-                            }
-                            else
-                                sendMessage("-ERR user or password false");
                         }
-                    }
-                    break;
-                case "STAT":
-                    if(state == State.TRANSACTION) {
+                        break;
+                    case "STAT":
+                        if (state == State.TRANSACTION) {
 
-                    }
-                    break;
-                case "RETR":
-                    if(state == State.TRANSACTION) {
+                        }
+                        break;
+                    case "RETR":
+                        if (state == State.TRANSACTION) {
 
-                    }
-                    break;
+                        }
+                        break;
+                }
             }
         }
     }
