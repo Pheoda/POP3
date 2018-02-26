@@ -103,7 +103,7 @@ public class Connection implements Runnable {
                                         break;
                                     }
                                 }
-                                // server.User reconnu ou non
+                                // User reconnu ou non
                                 if (currentUser != null) {
                                     state = State.TRANSACTION;
                                     sendMessage("+OK user connected");
@@ -117,7 +117,7 @@ public class Connection implements Runnable {
                         break;
                     case "STAT":
                         if (state == State.TRANSACTION) {
-                            //sendMessage();
+                            sendMessage("+OK " +  currentUser.getNbMessages() + " " + currentUser.getSizeMessage());
                         }
                         break;
                     case "RETR":

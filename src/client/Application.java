@@ -9,7 +9,7 @@ import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class Application extends Connection{
+public class Application extends Connection {
 
     public Application(InetAddress ia, int port) throws IOException {
         super(new Socket(ia, port));
@@ -37,6 +37,8 @@ public class Application extends Connection{
     @Override
     public void run() {
         boolean loop = true;
+
+        // Faut récupérer un socket et communiquer avec ça
         Scanner sc = new Scanner(System.in);
         while (loop) {
             try {
@@ -50,9 +52,12 @@ public class Application extends Connection{
 
                 assert response.length != 0;
 
-                switch (cmd.toUpperCase()){
+                switch (cmd.toUpperCase()) {
                     case "RETR":
                         printEmail();
+                        break;
+                    case "QUIT":
+                        loop = false;
                         break;
                     default:
                         for (String resp : response) {
@@ -60,11 +65,8 @@ public class Application extends Connection{
                                 System.out.println("Erreur :");
                             else if (!resp.equals("+OK"))
                                 System.out.println(resp);
-                            if (cmd.toUpperCase().equals("QUIT"))
-                                loop = false;
                         }
                 }
-
 
             } catch (IOException ex) {
                 Logger.getLogger(Application.class.getName()).log(Level.SEVERE, null, ex);
