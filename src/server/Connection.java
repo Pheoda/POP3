@@ -44,7 +44,7 @@ public class Connection implements Runnable {
         }
     }
 
-    private String[] readCommand() {
+    protected String[] readCommand() {
         int character = -1;
         boolean end = false, crReceived = false;
         String request = "";

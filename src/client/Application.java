@@ -1,0 +1,76 @@
+package client;
+
+import server.Connection;
+
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.Socket;
+import java.util.Scanner;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+public class Application extends Connection{
+
+    public Application(InetAddress ia, int port) throws IOException {
+        super(new Socket(ia, port));
+    }
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        System.out.print("Adresse IP serveur : ");
+        String ip = sc.nextLine();
+        System.out.print("Port serveur : ");
+        int port = sc.nextInt();
+        try {
+            Application c = new Application(InetAddress.getByName(ip), port);
+            new Thread(c).start();
+        } catch (IOException ex) {
+            Logger.getLogger(Application.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+    }
+
+    private void printEmail() {
+
+    }
+
+    @Override
+    public void run() {
+        boolean loop = true;
+        Scanner sc = new Scanner(System.in);
+        while (loop) {
+            try {
+                System.out.print("Client Started !");
+                String cmd = sc.nextLine();
+                byte[] data = cmd.getBytes();
+                out.write(data);
+                out.flush();
+
+                String[] response = readCommand();
+
+                assert response.length != 0;
+
+                switch (cmd.toUpperCase()){
+                    case "RETR":
+                        printEmail();
+                        break;
+                    default:
+                        for (String resp : response) {
+                            if (resp.equals("-ERR"))
+                                System.out.println("Erreur :");
+                            else if (!resp.equals("+OK"))
+                                System.out.println(resp);
+                            if (cmd.toUpperCase().equals("QUIT"))
+                                loop = false;
+                        }
+                }
+
+
+            } catch (IOException ex) {
+                Logger.getLogger(Application.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+    }
+
+
+}
