@@ -82,7 +82,7 @@ public class Connection implements Runnable {
             String[] clientMessage = readCommand();
             System.out.println("received=");
             for(int i = 0; i < clientMessage.length; i++)
-                System.out.println(clientMessage[i] + '\n');
+                System.out.println(clientMessage[i]);
 
             if(clientMessage.length > 0) {
                 String command = clientMessage[0].toUpperCase();
@@ -96,7 +96,7 @@ public class Connection implements Runnable {
                     case "APOP":
                         // Check list users
                         if (state == State.AUTHORIZATION) {
-                            if (command.length() == 3) {
+                            if (clientMessage.length == 3) {
                                 for (User u : listUsers) {
                                     if (u.userExists(clientMessage[1], clientMessage[2])) {
                                         currentUser = u;
@@ -107,14 +107,17 @@ public class Connection implements Runnable {
                                 if (currentUser != null) {
                                     state = State.TRANSACTION;
                                     sendMessage("+OK user connected");
-                                } else
+                                }
+                                else
                                     sendMessage("-ERR user or password false");
                             }
+                            else
+                                sendMessage("-ERR wrong number of parameters (" + clientMessage.length + ")");
                         }
                         break;
                     case "STAT":
                         if (state == State.TRANSACTION) {
-
+                            //sendMessage();
                         }
                         break;
                     case "RETR":
