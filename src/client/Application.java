@@ -41,24 +41,26 @@ public class Application extends Connection {
         Scanner sc = new Scanner(System.in);
         while (loop) {
             try {
-                System.out.print("Client Started !");
+                System.out.println("Client Started !");
                 String cmd = sc.nextLine();
                 byte[] data = cmd.getBytes();
                 out.write(data);
                 out.flush();
 
-                String[] response = readCommand();
+                String[] cmd_tab = cmd.split("\\s+");
 
-                assert response.length != 0;
-
-                switch (cmd.toUpperCase()) {
+                switch (cmd_tab[0].toUpperCase()) {
                     case "RETR":
+                        System.out.println("retr");
                         printEmail();
                         break;
                     case "QUIT":
+                        System.out.println("quit");
                         loop = false;
                         break;
                     default:
+                        String[] response = readCommand();
+                        System.out.println("default");
                         for (String resp : response) {
                             if (resp.equals("-ERR"))
                                 System.out.println("Erreur :");
