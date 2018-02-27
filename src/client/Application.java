@@ -38,7 +38,6 @@ public class Application extends Connection {
     public void run() {
         boolean loop = true;
 
-        // Faut récupérer un socket et communiquer avec ça
         Scanner sc = new Scanner(System.in);
         while (loop) {
             try {

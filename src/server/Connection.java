@@ -10,8 +10,8 @@ import java.util.logging.Logger;
 
 public class Connection implements Runnable {
 
-    public final int CR = 13;
-    public final int LF = 10;
+    public final static int CR = 13;
+    public final static int LF = 10;
 
     private User[] listUsers = {
             new User("user", "pass"),
@@ -122,7 +122,22 @@ public class Connection implements Runnable {
                         break;
                     case "RETR":
                         if (state == State.TRANSACTION) {
+                            if(clientMessage.length > 1) {
+                                // Gérer les NumberFormatException lors du parsing !!
+                                int messageNumber = Integer.parseInt(clientMessage[1]);
 
+                                if(messageNumber < 0 || messageNumber >= currentUser.getNbMessages()) {
+                                    sendMessage("-ERR message " + messageNumber + " doesn't exist");
+                                }
+                                else {
+                                    sendMessage("+OK " + currentUser.getSizeMessage(messageNumber));
+                                    sendMessage(currentUser.getMessage(messageNumber));
+                                    sendMessage(".\r\n");
+                                }
+
+                            }
+                            else
+                                sendMessage("-ERR wrong number of parameters (" + clientMessage.length + ")");
                         }
                         break;
                 }

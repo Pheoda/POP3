@@ -1,15 +1,13 @@
 package server;
 
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
 
 public class User {
     private String username;
     private String password;
-
-    private int nbMessages = 0;
 
     private ArrayList<Mail> messages;
 
@@ -24,10 +22,19 @@ public class User {
         try {
             this.reader = new BufferedReader(new FileReader(this.username + ".txt"));
             String line;
+            String currentMessage = "";
+            int currentSize = 0;
             while((line = reader.readLine()) != null) {
-                // Stocker string line dans Messages[nbMessages] pour les restituer ensuite
-                if(line == ".\n")
-                    nbMessages++;
+                line += "\r\n";
+                currentMessage += line;
+                currentSize += line.length();
+                if(line.equals(".\r\n")) {
+                    messages.add(new Mail(currentMessage, currentSize));
+                    System.out.println("New mail : size=" + currentSize);
+                    System.out.println(currentMessage);
+                    currentMessage = "";
+                    currentSize = 0;
+                }
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -35,20 +42,26 @@ public class User {
     }
 
     public int getNbMessages() {
-        return nbMessages;
+        return messages.size();
     }
 
-    public int getSizeMessage(int i = -1) {
-        // Total size if i equals to -1
-        if(i == -1) {
-            int sum = 0;
-            for (Mail m : messages) {
-                sum += m.getSize();
-            }
-            return sum;
+    // Total size
+    public int getSizeMessage()
+    {
+        int sum = 0;
+        for (Mail m : messages) {
+            sum += m.getSize();
         }
-        else
-            return messages.get(i).getSize();
+        return sum;
+    }
+
+    // Size of the message i
+    public int getSizeMessage(int i) {
+        return messages.get(i).getSize();
+    }
+
+    public String getMessage(int i) {
+        return messages.get(i).getMessage();
     }
 
     public boolean userExists(String username, String password) {
