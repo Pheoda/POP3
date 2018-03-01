@@ -30,8 +30,6 @@ public class User {
                 currentSize += line.length();
                 if(line.equals(".\r\n")) {
                     messages.add(new Mail(currentMessage, currentSize));
-                    //System.out.println("New mail : size=" + currentSize);
-                    //System.out.println(currentMessage);
                     currentMessage = "";
                     currentSize = 0;
                 }

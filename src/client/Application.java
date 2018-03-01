@@ -41,7 +41,7 @@ public class Application extends Connection {
         Scanner sc = new Scanner(System.in);
         while (loop) {
             try {
-                System.out.println("Client Started !");
+                System.out.print("Commande : ");
                 String cmd = sc.nextLine();
                 byte[] data = cmd.getBytes();
                 out.write(data);
@@ -49,28 +49,37 @@ public class Application extends Connection {
 
                 String[] cmd_tab = cmd.split("\\s+");
 
+                boolean responseWaited = false;
+
                 switch (cmd_tab[0].toUpperCase()) {
                     case "RETR":
                         System.out.println("retr");
+                        responseWaited = true;
                         printEmail();
                         break;
                     case "QUIT":
                         System.out.println("quit");
+                        responseWaited = true;
                         loop = false;
                         break;
-                    default:
-                        String[] response = readCommand();
-                        System.out.println("default");
+                    case "APOP": // TODO Depend de l'etat de l'automate, revoir la logique ! FAIRE DIFFEREMMENT
+                    case "STAT":
+                        responseWaited = true;
+                        break;
+                }
+                if(responseWaited) {
+                    String[] response = readCommand();
+                    System.out.println("default");
+                    // TODO Faire une fonction pour recuperer la reponse serveur
+                    if (response[0].equals("-ERR") || response[0].equals("+OK"))
                         for (String resp : response) {
-                            if (resp.equals("-ERR"))
-                                System.out.println("Erreur :");
-                            else if (!resp.equals("+OK"))
-                                System.out.println(resp);
+                            System.out.print(resp + " ");
                         }
                 }
 
             } catch (IOException ex) {
                 Logger.getLogger(Application.class.getName()).log(Level.SEVERE, null, ex);
+                loop = false;
             }
         }
     }

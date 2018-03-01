@@ -36,7 +36,9 @@ public class Connection implements Runnable {
             out = socket.getOutputStream();
             bufIn = new BufferedInputStream(in);
 
-            sendMessage("+OK POP3 server ready");
+            System.out.println("==New connection");
+
+            sendMessage("+OK POP3 server ready\r\n");
 
             state  = State.AUTHORIZATION;
         } catch (IOException ex) {
@@ -69,7 +71,7 @@ public class Connection implements Runnable {
 
     private void sendMessage(String message) {
         try {
-            out.write(message.getBytes());
+            out.write((message + "\r\n").getBytes());
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -80,7 +82,7 @@ public class Connection implements Runnable {
         boolean run = true;
         while(run) {
             String[] clientMessage = readCommand();
-            System.out.println("received=");
+            //System.out.println("received=");
             for(int i = 0; i < clientMessage.length; i++)
                 System.out.println(clientMessage[i]);
 

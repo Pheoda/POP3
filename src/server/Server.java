@@ -24,19 +24,20 @@ public class Server implements Runnable {
         Server s = new Server();
 
         new Thread(s).start();
-
     }
 
     @Override
     public void run() {
-        while (true) {
+        boolean loop = true;
+
+        while (loop) {
             try {
                 Socket connexion;
                 connexion = server.accept();
                 new Thread(new Connection(connexion)).start();
-
             } catch (IOException ex) {
                 Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
+                loop = false;
             }
         }
     }
