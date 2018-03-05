@@ -13,6 +13,8 @@ public class Connection implements Runnable {
     public final static int CR = 13;
     public final static int LF = 10;
 
+    boolean run = true;
+
     private User[] listUsers = {
             new User("user", "pass"),
             new User("user2", "pass")
@@ -35,8 +37,6 @@ public class Connection implements Runnable {
             in = socket.getInputStream();
             out = socket.getOutputStream();
             bufIn = new BufferedInputStream(in);
-
-            System.out.println("==New connection");
 
             sendMessage("+OK POP3 server ready");
 
@@ -61,7 +61,7 @@ public class Connection implements Runnable {
                 crReceived = (character == CR);
 
             } catch (IOException e) {
-                e.printStackTrace();
+                run = false;
             }
         }while(character != -1 && !end);
 
@@ -80,7 +80,6 @@ public class Connection implements Runnable {
 
     @Override
     public void run() {
-        boolean run = true;
         while(run) {
             String[] clientMessage = readCommand();
             System.err.print("Received : ");
@@ -126,7 +125,7 @@ public class Connection implements Runnable {
                     case "RETR":
                         if (state == State.TRANSACTION) {
                             if(clientMessage.length > 1) {
-                                // Gérer les NumberFormatException lors du parsing !!
+                                // TODO Gérer les NumberFormatException lors du parsing !!
                                 int messageNumber = Integer.parseInt(clientMessage[1]);
 
                                 if(messageNumber < 0 || messageNumber >= currentUser.getNbMessages()) {
@@ -135,7 +134,6 @@ public class Connection implements Runnable {
                                 else {
                                     sendMessage("+OK " + currentUser.getSizeMessage(messageNumber));
                                     sendMessage(currentUser.getMessage(messageNumber));
-                                    sendMessage(".\r\n");
                                 }
 
                             }
