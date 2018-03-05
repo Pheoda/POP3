@@ -38,7 +38,7 @@ public class Connection implements Runnable {
 
             System.out.println("==New connection");
 
-            sendMessage("+OK POP3 server ready\r\n");
+            sendMessage("+OK POP3 server ready");
 
             state  = State.AUTHORIZATION;
         } catch (IOException ex) {
@@ -72,6 +72,7 @@ public class Connection implements Runnable {
     private void sendMessage(String message) {
         try {
             out.write((message + "\r\n").getBytes());
+            System.out.println("Said : " + message);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -82,10 +83,10 @@ public class Connection implements Runnable {
         boolean run = true;
         while(run) {
             String[] clientMessage = readCommand();
-            //System.out.println("received=");
+            System.err.print("Received : ");
             for(int i = 0; i < clientMessage.length; i++)
-                System.out.println(clientMessage[i]);
-
+                System.err.print(clientMessage[i] + " ");
+            System.err.println();
             if(clientMessage.length > 0) {
                 String command = clientMessage[0].toUpperCase();
 
