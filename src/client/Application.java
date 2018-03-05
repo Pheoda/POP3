@@ -31,7 +31,19 @@ public class Application extends Connection {
     }
 
     private void printEmail() {
-
+        String [] str_tab;
+        boolean mailFinished = false;
+        do {
+            str_tab = readCommand();
+            if (str_tab.length != 0) {
+                for (String s : str_tab) {
+                    System.out.print(s + " ");
+                }
+                System.out.println();
+            }
+            if(str_tab.length > 0)
+                mailFinished = str_tab[0].equals(".");
+        } while (!mailFinished);
     }
 
     @Override
@@ -40,49 +52,34 @@ public class Application extends Connection {
 
         Scanner sc = new Scanner(System.in);
         while (loop) {
+            String[] response = readCommand();
+            for (String re : response)
+                System.out.print(re + " ");
+
             try {
-                System.out.print("Commande : ");
                 String cmd = sc.nextLine();
-                byte[] data = cmd.getBytes();
+                byte[] data = (cmd+"\r\n").getBytes();
                 out.write(data);
                 out.flush();
 
                 String[] cmd_tab = cmd.split("\\s+");
 
-                boolean responseWaited = false;
-
                 switch (cmd_tab[0].toUpperCase()) {
                     case "RETR":
                         System.out.println("retr");
-                        responseWaited = true;
                         printEmail();
                         break;
                     case "QUIT":
                         System.out.println("quit");
-                        responseWaited = true;
                         loop = false;
                         break;
-                    case "APOP": // TODO Depend de l'etat de l'automate, revoir la logique ! FAIRE DIFFEREMMENT
-                    case "STAT":
-                        responseWaited = true;
+                    default:
                         break;
-                }
-                if(responseWaited) {
-                    String[] response = readCommand();
-                    System.out.println("default");
-                    // TODO Faire une fonction pour recuperer la reponse serveur
-                    if (response[0].equals("-ERR") || response[0].equals("+OK"))
-                        for (String resp : response) {
-                            System.out.print(resp + " ");
-                        }
                 }
 
             } catch (IOException ex) {
                 Logger.getLogger(Application.class.getName()).log(Level.SEVERE, null, ex);
-                loop = false;
             }
         }
     }
-
-
 }
