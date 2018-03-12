@@ -22,7 +22,9 @@ public class Connection implements Runnable {
 
     private User currentUser = null;
 
-    public enum State {AUTHORIZATION, TRANSACTION};
+    public enum State {AUTHORIZATION, TRANSACTION}
+
+    ;
 
     protected Socket socket;
     protected InputStream in;
@@ -38,9 +40,7 @@ public class Connection implements Runnable {
             out = socket.getOutputStream();
             bufIn = new BufferedInputStream(in);
 
-            sendMessage("+OK POP3 server ready");
-
-            state  = State.AUTHORIZATION;
+            state = State.AUTHORIZATION;
         } catch (IOException ex) {
             Logger.getLogger(Connection.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -63,7 +63,7 @@ public class Connection implements Runnable {
             } catch (IOException e) {
                 run = false;
             }
-        }while(character != -1 && !end);
+        } while (character != -1 && !end);
 
         return request.split("\\s+");
     }
@@ -80,13 +80,16 @@ public class Connection implements Runnable {
 
     @Override
     public void run() {
-        while(run) {
+
+        sendMessage("+OK POP3 server ready");
+
+        while (run) {
             String[] clientMessage = readCommand();
             System.err.print("Received : ");
-            for(int i = 0; i < clientMessage.length; i++)
+            for (int i = 0; i < clientMessage.length; i++)
                 System.err.print(clientMessage[i] + " ");
             System.err.println();
-            if(clientMessage.length > 0) {
+            if (clientMessage.length > 0) {
                 String command = clientMessage[0].toUpperCase();
 
                 switch (command) {
@@ -109,35 +112,31 @@ public class Connection implements Runnable {
                                 if (currentUser != null) {
                                     state = State.TRANSACTION;
                                     sendMessage("+OK user connected");
-                                }
-                                else
+                                } else
                                     sendMessage("-ERR user or password false");
-                            }
-                            else
+                            } else
                                 sendMessage("-ERR wrong number of parameters (" + clientMessage.length + ")");
                         }
                         break;
                     case "STAT":
                         if (state == State.TRANSACTION) {
-                            sendMessage("+OK " +  currentUser.getNbMessages() + " " + currentUser.getSizeMessage());
+                            sendMessage("+OK " + currentUser.getNbMessages() + " " + currentUser.getSizeMessage());
                         }
                         break;
                     case "RETR":
                         if (state == State.TRANSACTION) {
-                            if(clientMessage.length > 1) {
+                            if (clientMessage.length > 1) {
                                 // TODO Gérer les NumberFormatException lors du parsing !!
                                 int messageNumber = Integer.parseInt(clientMessage[1]);
 
-                                if(messageNumber < 0 || messageNumber >= currentUser.getNbMessages()) {
+                                if (messageNumber < 0 || messageNumber >= currentUser.getNbMessages()) {
                                     sendMessage("-ERR message " + messageNumber + " doesn't exist");
-                                }
-                                else {
+                                } else {
                                     sendMessage("+OK " + currentUser.getSizeMessage(messageNumber));
                                     sendMessage(currentUser.getMessage(messageNumber));
                                 }
 
-                            }
-                            else
+                            } else
                                 sendMessage("-ERR wrong number of parameters (" + clientMessage.length + ")");
                         }
                         break;

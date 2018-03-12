@@ -11,8 +11,12 @@ import java.util.logging.Logger;
 
 public class Application extends Connection {
 
+    private boolean skipCommand;
+
     public Application(InetAddress ia, int port) throws IOException {
         super(new Socket(ia, port));
+
+        skipCommand = false;
     }
 
     public static void main(String[] args) {
@@ -27,38 +31,45 @@ public class Application extends Connection {
         } catch (IOException ex) {
             Logger.getLogger(Application.class.getName()).log(Level.SEVERE, null, ex);
         }
+    }
 
+    private void printString(String[] str) {
+        for (String s : str) {
+            System.out.print(s + " ");
+        }
     }
 
     private void printEmail() {
-        String [] str_tab;
+        String[] str_tab;
         boolean mailFinished = false;
         do {
             str_tab = readCommand();
-            if (str_tab.length != 0) {
-                for (String s : str_tab) {
-                    System.out.print(s + " ");
-                }
+            if (str_tab.length > 0) {
+                printString(str_tab);
                 System.out.println();
+
+                skipCommand = str_tab[0].equals("-ERR");
+                mailFinished = str_tab[0].equals(".") || skipCommand;
             }
-            if(str_tab.length > 0)
-                mailFinished = str_tab[0].equals(".");
         } while (!mailFinished);
     }
 
     @Override
     public void run() {
         boolean loop = true;
-
+        String[] response = null;
         Scanner sc = new Scanner(System.in);
         while (loop) {
-            String[] response = readCommand();
-            for (String re : response)
-                System.out.print(re + " ");
+            if (!skipCommand) {
+                response = readCommand();
+                printString(response);
+            } else
+                skipCommand = false;
+
 
             try {
                 String cmd = sc.nextLine();
-                byte[] data = (cmd+"\r\n").getBytes();
+                byte[] data = (cmd + "\r\n").getBytes();
                 out.write(data);
                 out.flush();
 
@@ -66,11 +77,9 @@ public class Application extends Connection {
 
                 switch (cmd_tab[0].toUpperCase()) {
                     case "RETR":
-                        System.out.println("retr");
                         printEmail();
                         break;
                     case "QUIT":
-                        System.out.println("quit");
                         loop = false;
                         break;
                     default:
