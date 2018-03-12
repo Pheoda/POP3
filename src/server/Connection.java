@@ -1,4 +1,4 @@
-package server;
+﻿package server;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
@@ -39,7 +39,6 @@ public class Connection implements Runnable {
             in = socket.getInputStream();
             out = socket.getOutputStream();
             bufIn = new BufferedInputStream(in);
-
             state = State.AUTHORIZATION;
         } catch (IOException ex) {
             Logger.getLogger(Connection.class.getName()).log(Level.SEVERE, null, ex);
@@ -78,11 +77,13 @@ public class Connection implements Runnable {
         }
     }
 
+    private void sendError() {
+        this.sendMessage("-ERR commande impossible");
+    }
+
     @Override
     public void run() {
-
         sendMessage("+OK POP3 server ready");
-
         while (run) {
             String[] clientMessage = readCommand();
             System.err.print("Received : ");
@@ -116,17 +117,20 @@ public class Connection implements Runnable {
                                     sendMessage("-ERR user or password false");
                             } else
                                 sendMessage("-ERR wrong number of parameters (" + clientMessage.length + ")");
+                        } else {
+                            sendError();
                         }
                         break;
                     case "STAT":
                         if (state == State.TRANSACTION) {
                             sendMessage("+OK " + currentUser.getNbMessages() + " " + currentUser.getSizeMessage());
+                        } else {
+                            sendError();
                         }
                         break;
                     case "RETR":
                         if (state == State.TRANSACTION) {
                             if (clientMessage.length > 1) {
-                                // TODO Gérer les NumberFormatException lors du parsing !!
                                 int messageNumber = Integer.parseInt(clientMessage[1]);
 
                                 if (messageNumber < 0 || messageNumber >= currentUser.getNbMessages()) {
@@ -138,8 +142,12 @@ public class Connection implements Runnable {
 
                             } else
                                 sendMessage("-ERR wrong number of parameters (" + clientMessage.length + ")");
+                        } else {
+                            sendError();
                         }
                         break;
+                    default:
+                        sendError();
                 }
             }
         }
